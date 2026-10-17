@@ -37,6 +37,7 @@ the fixture repositories stay free of any dependency on this one.
 docs/
   design.md                  the design as summarized before review
   design-addendum.md         what changed after the two reviews; current positions
+  briefs/                    build briefs for Claude Code, one per milestone
   expectation-language.md    evidence model, projections, expectation kinds, verdict semantics (v0)
   reviews/                   the two independent reviews, verbatim
 corpus/
@@ -52,7 +53,8 @@ corpus/
 
 ## Milestone 1: `oracle check`
 
-The first runtime (TypeScript, Node 22) must:
+The build brief is `docs/briefs/milestone-1-runtime.md`. In short, the first
+runtime (TypeScript, Node 22) must:
 
 1. Load a target directory (`oracle.yaml`, projections, expectations).
 2. Drive an experiment against the running target through generic HTTP steps,
