@@ -14,7 +14,7 @@ reasoning: >
   API-level twin of dec-003 and exists because the storage invariant can only
   fire once a bad row exists, while this one fires on the request itself.
 independent_sources:
-  - fixture-order-service/openapi.yaml (declared, minimum: 1)
+  - "fixture-order-service/openapi.yaml (declared, minimum: 1)"
 confirmation: >
   Drafted by the assistant. Committing this file is the product owner's
   confirmation.

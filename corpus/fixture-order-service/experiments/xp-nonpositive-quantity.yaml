@@ -47,4 +47,4 @@ expected:
     exp-line-quantity-positive: violated                 # the quantity-0 line is stored
     exp-order-total-equals-lines: satisfied              # 0 == 0
 coverage_expected:
-  - "POST /orders 500"                                   # only under D5; a 500 is never explained by an expectation
+  - "POST /orders 500"                                   # only under D5; explained, but only as a violation of exp-create-rejects-nonpositive-quantity
