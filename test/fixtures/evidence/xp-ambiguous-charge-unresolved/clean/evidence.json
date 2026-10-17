@@ -1,0 +1,55 @@
+{
+  "horizon": {
+    "fixture_time": "2026-10-17T19:44:58.115Z",
+    "reached": true,
+    "reason": null
+  },
+  "run_error": null,
+  "sources": {
+    "db": {
+      "horizon": {
+        "complete_through": 4,
+        "high_water_mark": 4
+      },
+      "read_error": null,
+      "record_count": 4,
+      "start_mark": 0
+    },
+    "http": {
+      "horizon": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "read_error": null,
+      "record_count": 2,
+      "start_mark": 0
+    },
+    "outbound": {
+      "horizon": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "read_error": null,
+      "record_count": 1,
+      "start_mark": 0
+    },
+    "provider.ledger": {
+      "horizon": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "read_error": null,
+      "record_count": 0,
+      "start_mark": 0
+    },
+    "provider.requests": {
+      "horizon": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "read_error": null,
+      "record_count": 1,
+      "start_mark": 0
+    }
+  }
+}

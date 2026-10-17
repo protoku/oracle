@@ -1,0 +1,28 @@
+{
+  "configuration": {
+    "flags": [],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "clean"
+  },
+  "experiment": "xp-ambiguous-charge-unresolved",
+  "finished_at": "2026-10-17T19:44:58.129Z",
+  "run_id": "xp-ambiguous-charge-unresolved-20261017T194455Z-0ccb",
+  "started_at": "2026-10-17T19:44:55.933Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 12,
+      "status": 201
+    },
+    {
+      "id": "arm",
+      "ms": 1,
+      "status": 200
+    },
+    {
+      "id": "pay1",
+      "ms": 2012,
+      "status": 502
+    }
+  ]
+}

@@ -1,0 +1,30 @@
+{
+  "configuration": {
+    "flags": [
+      "D3_create_idempotency_ignored"
+    ],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "D3_create_idempotency_ignored"
+  },
+  "experiment": "xp-create-same-key-twice",
+  "finished_at": "2026-10-17T19:45:30.767Z",
+  "run_id": "xp-create-same-key-twice-20261017T194530Z-ddca",
+  "started_at": "2026-10-17T19:45:30.506Z",
+  "steps": [
+    {
+      "id": "first",
+      "ms": 8,
+      "status": 201
+    },
+    {
+      "id": "replay",
+      "ms": 9,
+      "status": 201
+    },
+    {
+      "id": "different-body",
+      "ms": 8,
+      "status": 201
+    }
+  ]
+}

@@ -1,0 +1,48 @@
+{
+  "configuration": {
+    "flags": [],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "clean"
+  },
+  "experiment": "xp-refund-vs-job-race",
+  "finished_at": "2026-10-17T19:45:01.189Z",
+  "run_id": "xp-refund-vs-job-race-20261017T194459Z-8d98",
+  "started_at": "2026-10-17T19:44:59.471Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 7,
+      "status": 201
+    },
+    {
+      "id": "pay",
+      "ms": 15,
+      "status": 200
+    },
+    {
+      "id": "arm-slow-refund",
+      "ms": 1,
+      "status": 200
+    },
+    {
+      "id": "wait",
+      "ms": 301,
+      "status": null
+    },
+    {
+      "id": "job",
+      "ms": 8,
+      "status": 200
+    },
+    {
+      "id": "cancel",
+      "ms": 1525,
+      "status": 409
+    },
+    {
+      "id": "race",
+      "ms": 1533,
+      "status": null
+    }
+  ]
+}

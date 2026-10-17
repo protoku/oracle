@@ -1,0 +1,30 @@
+{
+  "configuration": {
+    "flags": [
+      "D5_negative_quantity_accepted"
+    ],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "D5_negative_quantity_accepted"
+  },
+  "experiment": "xp-nonpositive-quantity",
+  "finished_at": "2026-10-17T19:46:02.874Z",
+  "run_id": "xp-nonpositive-quantity-20261017T194602Z-6754",
+  "started_at": "2026-10-17T19:46:02.609Z",
+  "steps": [
+    {
+      "id": "zero",
+      "ms": 23,
+      "status": 201
+    },
+    {
+      "id": "negative",
+      "ms": 5,
+      "status": 500
+    },
+    {
+      "id": "valid",
+      "ms": 9,
+      "status": 201
+    }
+  ]
+}

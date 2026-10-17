@@ -1,0 +1,843 @@
+{
+  "coverage": [
+    {
+      "class": "attempt.latest",
+      "example_seqs": [
+        4
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "attempt.with_ledger_charge",
+      "example_seqs": [
+        4
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "charge.call_vs_ledger",
+      "example_seqs": [
+        1
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "http.create_order",
+      "example_seqs": [
+        1
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "ledger.charge",
+      "example_seqs": [
+        1
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "order.created_by_key",
+      "example_seqs": [
+        1
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "order.created_snapshot",
+      "example_seqs": [
+        2
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "order.ledger_charges",
+      "example_seqs": [
+        1
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "order.outcome",
+      "example_seqs": [
+        12
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "order.status_changed",
+      "example_seqs": [
+        1,
+        5,
+        8
+      ],
+      "kind": "event",
+      "total": 4,
+      "unexplained": 0
+    },
+    {
+      "class": "order_line.inserted",
+      "example_seqs": [
+        2
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "outbound.charge_call",
+      "example_seqs": [
+        1
+      ],
+      "kind": "event",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "POST /orders 201",
+      "example_seqs": [
+        1
+      ],
+      "kind": "http",
+      "total": 1,
+      "unexplained": 0
+    },
+    {
+      "class": "POST /orders/:id/cancel 200",
+      "example_seqs": [
+        3
+      ],
+      "kind": "http",
+      "total": 1,
+      "unexplained": 1
+    },
+    {
+      "class": "POST /orders/:id/pay 200",
+      "example_seqs": [
+        2
+      ],
+      "kind": "http",
+      "total": 1,
+      "unexplained": 1
+    }
+  ],
+  "sources": [
+    {
+      "complete": true,
+      "complete_through": 14,
+      "detail": "db: complete through 14",
+      "high_water_mark": 14,
+      "reason": null,
+      "regression": null,
+      "reliable": true,
+      "source": "db"
+    },
+    {
+      "complete": true,
+      "complete_through": 3,
+      "detail": "http: complete through 3",
+      "high_water_mark": 3,
+      "reason": null,
+      "regression": null,
+      "reliable": true,
+      "source": "http"
+    },
+    {
+      "complete": true,
+      "complete_through": 2,
+      "detail": "outbound: complete through 2",
+      "high_water_mark": 2,
+      "reason": null,
+      "regression": null,
+      "reliable": true,
+      "source": "outbound"
+    },
+    {
+      "complete": true,
+      "complete_through": 2,
+      "detail": "provider.ledger: complete through 2",
+      "high_water_mark": 2,
+      "reason": null,
+      "regression": null,
+      "reliable": true,
+      "source": "provider.ledger"
+    },
+    {
+      "complete": true,
+      "complete_through": 2,
+      "detail": "provider.requests: complete through 2",
+      "high_water_mark": 2,
+      "reason": null,
+      "regression": null,
+      "reliable": true,
+      "source": "provider.requests"
+    }
+  ],
+  "verdicts": [
+    {
+      "best_effort": false,
+      "detail": "1 instance satisfied",
+      "expectation": "exp-charge-at-most-once-per-order",
+      "instances": [
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: ledger_charge_count 1",
+          "evidence_range": {
+            "outbound": {
+              "from": 1,
+              "to": 1
+            },
+            "provider.ledger": {
+              "from": 1,
+              "to": 1
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order.ledger_charges#1",
+            "seq": 1,
+            "source": "derived"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        }
+      ],
+      "kind": "invariant",
+      "projections": [
+        {
+          "id": "prj-charge-call-vs-ledger",
+          "version": 1
+        },
+        {
+          "id": "prj-ledger-charge",
+          "version": 1
+        },
+        {
+          "id": "prj-order-ledger-charges",
+          "version": 1
+        },
+        {
+          "id": "prj-outbound-charge-call",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "satisfied",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "1 instance satisfied",
+      "expectation": "exp-create-idempotent",
+      "instances": [
+        {
+          "detail": "idempotency_key 6776d26e-96d4-450b-b7f8-1f0d36bb4c3d: create_count 1, order_count 1",
+          "evidence_range": {
+            "http": {
+              "from": 1,
+              "to": 1
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "idempotency_key",
+              "value": "6776d26e-96d4-450b-b7f8-1f0d36bb4c3d"
+            },
+            "event": "order.created_by_key#1",
+            "seq": 1,
+            "source": "http"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        }
+      ],
+      "kind": "invariant",
+      "projections": [
+        {
+          "id": "prj-http-create-order",
+          "version": 1
+        },
+        {
+          "id": "prj-order-created-by-key",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "satisfied",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "1 instance, none applicable",
+      "expectation": "exp-create-rejects-nonpositive-quantity",
+      "instances": [
+        {
+          "detail": "where does not hold",
+          "evidence_range": {
+            "http": {
+              "from": 1,
+              "to": 1
+            }
+          },
+          "locator": {
+            "entity": null,
+            "event": "http.create_order#1",
+            "seq": 1,
+            "source": "http"
+          },
+          "reason": null,
+          "verdict": "not_applicable"
+        }
+      ],
+      "kind": "invariant",
+      "projections": [
+        {
+          "id": "prj-http-create-order",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "not_applicable",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "1 instance satisfied",
+      "expectation": "exp-failed-attempt-has-no-charge",
+      "instances": [
+        {
+          "detail": "attempt_id 0707bee5-dad0-4f2d-965e-70a456cbada2: attempt_status succeeded",
+          "evidence_range": {
+            "db": {
+              "from": 3,
+              "to": 4
+            },
+            "provider.ledger": {
+              "from": 1,
+              "to": 1
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "attempt_id",
+              "value": "0707bee5-dad0-4f2d-965e-70a456cbada2"
+            },
+            "event": "attempt.with_ledger_charge#1",
+            "seq": 4,
+            "source": "derived"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        }
+      ],
+      "kind": "invariant",
+      "projections": [
+        {
+          "id": "prj-attempt-latest",
+          "version": 1
+        },
+        {
+          "id": "prj-attempt-vs-ledger",
+          "version": 1
+        },
+        {
+          "id": "prj-ledger-charge",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "satisfied",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: fulfillment_count 1, succeeded_refund_count 1",
+      "expectation": "exp-fulfilled-and-refunded-exclusive",
+      "instances": [
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: fulfillment_count 1, succeeded_refund_count 1",
+          "evidence_range": {
+            "db": {
+              "from": 7,
+              "to": 12
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order.outcome#1",
+            "seq": 12,
+            "source": "db"
+          },
+          "reason": null,
+          "verdict": "violated"
+        }
+      ],
+      "kind": "invariant",
+      "projections": [
+        {
+          "id": "prj-order-outcome",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "violated",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "1 instance satisfied",
+      "expectation": "exp-line-quantity-positive",
+      "instances": [
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: quantity 1",
+          "evidence_range": {
+            "db": {
+              "from": 2,
+              "to": 2
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order_line.inserted#1",
+            "seq": 2,
+            "source": "db"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        }
+      ],
+      "kind": "invariant",
+      "projections": [
+        {
+          "id": "prj-order-line-inserted",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "satisfied",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "no instances",
+      "expectation": "exp-no-new-charge-after-ambiguous-outcome",
+      "instances": [],
+      "kind": "obligation",
+      "projections": [
+        {
+          "id": "prj-http-reconcile",
+          "version": 1
+        },
+        {
+          "id": "prj-outbound-charge-call",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "not_applicable",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "1 instance satisfied",
+      "expectation": "exp-order-total-equals-lines",
+      "instances": [
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: lines_sum 1999, total_cents 1999",
+          "evidence_range": {
+            "db": {
+              "from": 1,
+              "to": 2
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order.created_snapshot#1",
+            "seq": 2,
+            "source": "db"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        }
+      ],
+      "kind": "invariant",
+      "projections": [
+        {
+          "id": "prj-order-at-create",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "satisfied",
+      "version": 1
+    },
+    {
+      "best_effort": false,
+      "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: fulfilled → cancelled (not allowed)",
+      "expectation": "exp-order-transitions",
+      "instances": [
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: null → created",
+          "evidence_range": {
+            "db": {
+              "from": 1,
+              "to": 1
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order.status_changed#1",
+            "seq": 1,
+            "source": "db"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        },
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: created → paid",
+          "evidence_range": {
+            "db": {
+              "from": 5,
+              "to": 5
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order.status_changed#2",
+            "seq": 5,
+            "source": "db"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        },
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: paid → fulfilled",
+          "evidence_range": {
+            "db": {
+              "from": 8,
+              "to": 8
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order.status_changed#3",
+            "seq": 8,
+            "source": "db"
+          },
+          "reason": null,
+          "verdict": "satisfied"
+        },
+        {
+          "detail": "order_id ca5f392f-f211-465a-bc5e-81d185170e6f: fulfilled → cancelled (not allowed)",
+          "evidence_range": {
+            "db": {
+              "from": 13,
+              "to": 13
+            }
+          },
+          "locator": {
+            "entity": {
+              "field": "order_id",
+              "value": "ca5f392f-f211-465a-bc5e-81d185170e6f"
+            },
+            "event": "order.status_changed#4",
+            "seq": 13,
+            "source": "db"
+          },
+          "reason": null,
+          "verdict": "violated"
+        }
+      ],
+      "kind": "transition",
+      "projections": [
+        {
+          "id": "prj-order-status-changed",
+          "version": 1
+        }
+      ],
+      "reason": null,
+      "sources": {
+        "db": {
+          "complete_through": 14,
+          "high_water_mark": 14,
+          "reliable": true
+        },
+        "http": {
+          "complete_through": 3,
+          "high_water_mark": 3,
+          "reliable": true
+        },
+        "outbound": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.ledger": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        },
+        "provider.requests": {
+          "complete_through": 2,
+          "high_water_mark": 2,
+          "reliable": true
+        }
+      },
+      "verdict": "violated",
+      "version": 1
+    }
+  ]
+}

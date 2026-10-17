@@ -450,3 +450,62 @@ evidence:
 - Projection examples test projections; nothing yet tests expectations
   against synthetic events. Experiments against the fixture are the only
   expectation tests in milestone 1.
+
+---
+
+## v0.1 proposals
+
+Proposed edits found while building the milestone 1 runtime. Each is
+implemented as described and recorded in `docs/decisions.md`; none is adopted
+into the sections above until the owner accepts it.
+
+**v0.1 proposal (§2, null semantics; D-002).** Replace the null sentence with:
+"`equals` and `not_equals` compare JSON values, with null (or a missing path)
+as an ordinary value. `in`, `not_in`, `lt`, `lte`, `gt` and `gte` are false when
+the path value is null; ordering comparisons are also false unless both sides
+are numbers or both are strings. `exists` tests for null. `any` and `all` on a
+non-array or missing value are false." The current wording makes
+`prj-order-status-changed`'s own example fail.
+
+**v0.1 proposal (§5 and §6, no instances under an evidence gap; D-003).** Add to
+§5: "A run with no instances is `not_applicable`, unless a required source is
+incomplete or unreliable (§6), in which case it is `inconclusive`." Add to §6:
+"This holds even when there are no instances: a source that lost its records
+produces no events, and absence of instances must not be read as absence of
+behavior."
+
+**v0.1 proposal (§4.3, ordering and windows; D-006, D-007, D-008, D-009,
+D-010).** State the v0 ordering rule ("after" is greater `seq` within a source;
+across sources greater `fixture_time`, then `recorded_at`, then `seq`) and that
+an instance whose trigger, candidates or closing event cannot be ordered because
+a `fixture_time` is missing is `inconclusive`. For `until`: the closing event
+is the first event after the trigger passing `until.where`; `correlate_by` does
+not apply to it; candidates must come strictly before it. For `within`: a
+duration is an integer followed by `ms`, `s`, `m` or `h`; the window is closed
+when the fixture clock at the horizon has reached its end, and open when that
+clock is unknown. Extend "a count above the target is a violation as soon as it
+is observed" from `equals` to `lte`. Generalize §6's last bullet: a `require`
+whose window closed unmet is `violated` only if every source the required event
+is derived from is complete at the horizon.
+
+**v0.1 proposal (§3, group and join meta fields; D-004, D-005).** Add: "`source`
+is the inputs' common source, or `derived`; `recorded_at` is the maximum;
+`trace_id` is the common one or null. `count_distinct` ignores nulls. `sum`,
+`min`, `max` and `sum_product` skip non-numeric values (a `sum_product` row
+contributes 0) and mark the event `partial: true`."
+
+**v0.1 proposal (§7, coverage; D-012).** Define "consulted": a record or event
+supports an instance whose verdict is not `not_applicable`, as the instance's
+event, trigger, in-window candidate, closing event, group member or join side.
+Only confirmed expectations explain behavior. HTTP classes are
+`<method> <route> <status>`, matching how `coverage_expected` is written.
+
+**v0.1 proposal (§4, §9, §10, keys in use; D-014).** Add to §4 the optional
+`declared_in: [{ file, path, value }]` (where a `declared` expectation's source
+claim lives). Add to §9 the optional `confirmation` text. Add to §10:
+`target.notes`; `control.jobs` and `control.faults` (named endpoints,
+`{ service, method, path }`, for experiments and humans; the runtime does not
+call them); per source `shape: enveloped | flat` and, for flat sources,
+`envelope: { kind: { prefix, from } | { literal }, data: all }`; and a top-level
+`defect_flags` list that experiment flag blocks must draw from. Document that
+`control.version` reports active flags under `defects`.
