@@ -1,0 +1,33 @@
+{
+  "configuration": {
+    "flags": [],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "clean"
+  },
+  "experiment": "xp-cancel-fulfilled",
+  "finished_at": "2026-10-17T19:44:58.550Z",
+  "run_id": "xp-cancel-fulfilled-20261017T194458Z-addc",
+  "started_at": "2026-10-17T19:44:58.345Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 7,
+      "status": 201
+    },
+    {
+      "id": "pay",
+      "ms": 15,
+      "status": 200
+    },
+    {
+      "id": "job",
+      "ms": 6,
+      "status": 200
+    },
+    {
+      "id": "cancel",
+      "ms": 3,
+      "status": 409
+    }
+  ]
+}

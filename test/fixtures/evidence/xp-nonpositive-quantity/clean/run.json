@@ -1,0 +1,28 @@
+{
+  "configuration": {
+    "flags": [],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "clean"
+  },
+  "experiment": "xp-nonpositive-quantity",
+  "finished_at": "2026-10-17T19:44:59.467Z",
+  "run_id": "xp-nonpositive-quantity-20261017T194459Z-da1a",
+  "started_at": "2026-10-17T19:44:59.306Z",
+  "steps": [
+    {
+      "id": "zero",
+      "ms": 1,
+      "status": 422
+    },
+    {
+      "id": "negative",
+      "ms": 2,
+      "status": 422
+    },
+    {
+      "id": "valid",
+      "ms": 8,
+      "status": 201
+    }
+  ]
+}

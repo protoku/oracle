@@ -1,0 +1,33 @@
+{
+  "configuration": {
+    "flags": [],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "clean"
+  },
+  "experiment": "xp-ledger-stream-reset",
+  "finished_at": "2026-10-17T19:44:59.300Z",
+  "run_id": "xp-ledger-stream-reset-20261017T194459Z-7a24",
+  "started_at": "2026-10-17T19:44:59.106Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 8,
+      "status": 201
+    },
+    {
+      "id": "pay",
+      "ms": 22,
+      "status": 200
+    },
+    {
+      "id": "mark",
+      "ms": 0,
+      "status": null
+    },
+    {
+      "id": "lose-the-ledger",
+      "ms": 1,
+      "status": 200
+    }
+  ]
+}

@@ -1,0 +1,35 @@
+{
+  "configuration": {
+    "flags": [
+      "D1_fulfill_cancelled"
+    ],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "D1_fulfill_cancelled"
+  },
+  "experiment": "xp-cancel-after-pay-before-job",
+  "finished_at": "2026-10-17T19:45:08.759Z",
+  "run_id": "xp-cancel-after-pay-before-job-20261017T194508Z-8e18",
+  "started_at": "2026-10-17T19:45:08.536Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 8,
+      "status": 201
+    },
+    {
+      "id": "pay",
+      "ms": 14,
+      "status": 200
+    },
+    {
+      "id": "cancel",
+      "ms": 14,
+      "status": 200
+    },
+    {
+      "id": "job",
+      "ms": 7,
+      "status": 200
+    }
+  ]
+}

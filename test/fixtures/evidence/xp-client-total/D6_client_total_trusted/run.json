@@ -1,0 +1,20 @@
+{
+  "configuration": {
+    "flags": [
+      "D6_client_total_trusted"
+    ],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "D6_client_total_trusted"
+  },
+  "experiment": "xp-client-total",
+  "finished_at": "2026-10-17T19:46:17.314Z",
+  "run_id": "xp-client-total-20261017T194617Z-45f0",
+  "started_at": "2026-10-17T19:46:17.129Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 8,
+      "status": 201
+    }
+  ]
+}

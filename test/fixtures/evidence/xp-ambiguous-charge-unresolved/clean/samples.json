@@ -1,0 +1,102 @@
+[
+  {
+    "label": "start",
+    "marks": {
+      "db": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "http": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "outbound": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.ledger": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.requests": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      }
+    }
+  },
+  {
+    "label": "create",
+    "marks": {
+      "db": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "http": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "outbound": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.ledger": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.requests": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      }
+    }
+  },
+  {
+    "label": "arm",
+    "marks": {
+      "db": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "http": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "outbound": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.ledger": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.requests": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      }
+    }
+  },
+  {
+    "label": "pay1",
+    "marks": {
+      "db": {
+        "complete_through": 4,
+        "high_water_mark": 4
+      },
+      "http": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "outbound": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "provider.ledger": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.requests": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      }
+    }
+  }
+]

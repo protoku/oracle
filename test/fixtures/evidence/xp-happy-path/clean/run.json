@@ -1,0 +1,28 @@
+{
+  "configuration": {
+    "flags": [],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "clean"
+  },
+  "experiment": "xp-happy-path",
+  "finished_at": "2026-10-17T19:44:59.101Z",
+  "run_id": "xp-happy-path-20261017T194458Z-6d11",
+  "started_at": "2026-10-17T19:44:58.915Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 8,
+      "status": 201
+    },
+    {
+      "id": "pay",
+      "ms": 14,
+      "status": 200
+    },
+    {
+      "id": "job",
+      "ms": 6,
+      "status": 200
+    }
+  ]
+}

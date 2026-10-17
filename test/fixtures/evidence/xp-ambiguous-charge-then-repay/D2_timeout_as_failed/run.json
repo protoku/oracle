@@ -1,0 +1,40 @@
+{
+  "configuration": {
+    "flags": [
+      "D2_timeout_as_failed"
+    ],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "D2_timeout_as_failed"
+  },
+  "experiment": "xp-ambiguous-charge-then-repay",
+  "finished_at": "2026-10-17T19:45:16.725Z",
+  "run_id": "xp-ambiguous-charge-then-repay-20261017T194516Z-77da",
+  "started_at": "2026-10-17T19:45:16.382Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 26,
+      "status": 201
+    },
+    {
+      "id": "arm",
+      "ms": 3,
+      "status": 200
+    },
+    {
+      "id": "pay1",
+      "ms": 15,
+      "status": 502
+    },
+    {
+      "id": "pay2",
+      "ms": 23,
+      "status": 200
+    },
+    {
+      "id": "reconcile",
+      "ms": 13,
+      "status": 200
+    }
+  ]
+}

@@ -1,0 +1,127 @@
+[
+  {
+    "label": "start",
+    "marks": {
+      "db": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "http": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "outbound": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.ledger": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.requests": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      }
+    }
+  },
+  {
+    "label": "create",
+    "marks": {
+      "db": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "http": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "outbound": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.ledger": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.requests": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      }
+    }
+  },
+  {
+    "label": "pay",
+    "marks": {
+      "db": {
+        "complete_through": 6,
+        "high_water_mark": 6
+      },
+      "http": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "outbound": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "provider.ledger": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "provider.requests": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      }
+    }
+  },
+  {
+    "label": "mark",
+    "marks": {
+      "db": {
+        "complete_through": 6,
+        "high_water_mark": 6
+      },
+      "http": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "outbound": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "provider.ledger": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "provider.requests": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      }
+    }
+  },
+  {
+    "label": "lose-the-ledger",
+    "marks": {
+      "db": {
+        "complete_through": 6,
+        "high_water_mark": 6
+      },
+      "http": {
+        "complete_through": 2,
+        "high_water_mark": 2
+      },
+      "outbound": {
+        "complete_through": 1,
+        "high_water_mark": 1
+      },
+      "provider.ledger": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      },
+      "provider.requests": {
+        "complete_through": 0,
+        "high_water_mark": 0
+      }
+    }
+  }
+]

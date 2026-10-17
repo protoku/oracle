@@ -1,0 +1,35 @@
+{
+  "configuration": {
+    "flags": [
+      "D4_cancel_fulfilled_allowed"
+    ],
+    "git_sha": "4c17f899f28912f9b6aad79498802ab5dc76e56a",
+    "name": "D4_cancel_fulfilled_allowed"
+  },
+  "experiment": "xp-cancel-fulfilled",
+  "finished_at": "2026-10-17T19:45:45.881Z",
+  "run_id": "xp-cancel-fulfilled-20261017T194545Z-fdf0",
+  "started_at": "2026-10-17T19:45:45.459Z",
+  "steps": [
+    {
+      "id": "create",
+      "ms": 16,
+      "status": 201
+    },
+    {
+      "id": "pay",
+      "ms": 101,
+      "status": 200
+    },
+    {
+      "id": "job",
+      "ms": 7,
+      "status": 200
+    },
+    {
+      "id": "cancel",
+      "ms": 19,
+      "status": 200
+    }
+  ]
+}

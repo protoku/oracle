@@ -1,0 +1,1 @@
+{"data":{"fault_applied":null,"method":"POST","path":"/charges","recorded_at":"2026-10-17T19:44:58.490Z","seq":1,"status":201,"trace_id":"xp-cancel-fulfilled-20261017T194458Z-addc-pay"},"fixture_time":null,"ids":{},"kind":"provider.request","recorded_at":"2026-10-17T19:44:58.490Z","seq":1,"source":"provider.requests","trace_id":"xp-cancel-fulfilled-20261017T194458Z-addc-pay"}
