@@ -1,0 +1,64 @@
+id: xp-refund-vs-job-race
+hypothesis: >
+  A paid order being cancelled while its refund is slow cannot be fulfilled in
+  the meantime. (Expected to be false on the clean build: the fixture's decision
+  log documents this race as left in place. This is the unflagged defect D0.)
+investigates:
+  - exp-fulfilled-and-refunded-exclusive
+  - exp-order-transitions
+  - exp-charge-at-most-once-per-order
+target: fixture-order-service
+seed: 8
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: pay
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k1, x-trace-id: "{{run}}-pay" }
+      body: { source: tok_ok }
+    expect_status: 200
+  - id: arm-slow-refund
+    http:
+      service: payment-provider
+      method: POST
+      path: /__control/arm
+      body: { trace_id: "{{run}}-cancel", fault: { kind: delay, ms: 1500 }, times: 1 }
+    expect_status: 200
+  - id: race
+    parallel:
+      - - id: cancel
+          http:
+            service: order-service
+            method: POST
+            path: "/orders/{{order_id}}/cancel"
+            headers: { x-trace-id: "{{run}}-cancel" }
+          note: under test; the refund call is held for 1.5 s
+      - - id: wait
+          sleep_ms: 300
+        - id: job
+          http:
+            service: order-service
+            method: POST
+            path: /__control/jobs/fulfillment/run
+            headers: { x-trace-id: "{{run}}-job" }
+          note: under test; runs while the refund is in flight
+horizon: quiesce
+expected:
+  default:
+    exp-fulfilled-and-refunded-exclusive: violated         # goods shipped and money returned, on the clean build
+    exp-order-transitions: satisfied                       # paid → fulfilled is allowed; the refund changes no status
+    exp-charge-at-most-once-per-order: satisfied
+coverage_expected:
+  - "POST /orders/:id/cancel 409"                          # order_changed: money moved, state did not; no expectation names it

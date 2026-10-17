@@ -1,0 +1,44 @@
+id: xp-create-same-key-twice
+hypothesis: >
+  Repeating a create with the same key and body returns the same order; the
+  same key with a different body is rejected; no second order is created.
+investigates:
+  - exp-create-idempotent
+target: fixture-order-service
+seed: 4
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: first
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{run}}-key", x-trace-id: "{{run}}-first" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: replay
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{run}}-key", x-trace-id: "{{run}}-replay" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    note: under test; clean build answers 200 with the same id
+  - id: different-body
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{run}}-key", x-trace-id: "{{run}}-different" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 3, unit_price_cents: 500 }] }
+    note: under test; clean build answers 422 idempotency_key_reused
+horizon: quiesce
+expected:
+  default:
+    exp-create-idempotent: satisfied
+  D3_create_idempotency_ignored:
+    exp-create-idempotent: violated          # three orders under one key
+coverage_expected:
+  - "POST /orders 422"                       # key reuse with a different body is not covered by an expectation yet

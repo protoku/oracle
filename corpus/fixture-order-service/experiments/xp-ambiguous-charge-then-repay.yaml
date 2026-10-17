@@ -1,0 +1,71 @@
+id: xp-ambiguous-charge-then-repay
+hypothesis: >
+  When the provider commits a charge but the response is lost, the service
+  records the attempt as unknown, refuses a new charge under a new key until
+  reconciled, and reconciliation discovers the charge. Nothing is charged
+  twice.
+investigates:
+  - exp-no-new-charge-after-ambiguous-outcome
+  - exp-charge-at-most-once-per-order
+  - exp-failed-attempt-has-no-charge
+  - exp-order-transitions
+target: fixture-order-service
+seed: 7
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: arm
+    http:
+      service: payment-provider
+      method: POST
+      path: /__control/arm
+      body: { trace_id: "{{run}}-pay1", fault: { kind: commit_then_drop }, times: 1 }
+    expect_status: 200
+    note: privileged knowledge belongs to the experiment, not to any expectation
+  - id: pay1
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k1, x-trace-id: "{{run}}-pay1" }
+      body: { source: tok_ok }
+    note: under test; the provider records the charge and drops the socket; service answers 502
+  - id: pay2
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k2, x-trace-id: "{{run}}-pay2" }
+      body: { source: tok_ok }
+    note: under test; clean build answers 409 reconcile_required with no provider call; D2 charges again
+  - id: reconcile
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/reconcile"
+      headers: { x-trace-id: "{{run}}-reconcile" }
+    note: under test; clean build finds the charge and marks the order paid
+horizon: quiesce
+expected:
+  default:
+    exp-no-new-charge-after-ambiguous-outcome: satisfied   # obligation closed by the 200 reconcile, nothing forbidden happened
+    exp-charge-at-most-once-per-order: satisfied
+    exp-failed-attempt-has-no-charge: satisfied
+    exp-order-transitions: satisfied                       # created → paid via reconcile
+  D2_timeout_as_failed:
+    exp-no-new-charge-after-ambiguous-outcome: violated    # a second charge call under k2 before any reconcile
+    exp-charge-at-most-once-per-order: violated            # two ledger charges
+    exp-failed-attempt-has-no-charge: violated             # attempt k1 is "failed" while its charge exists
+    exp-order-transitions: satisfied
+coverage_expected:
+  - "POST /orders/:id/pay 502"
+  - "POST /orders/:id/pay 409"

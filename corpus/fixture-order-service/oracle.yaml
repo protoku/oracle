@@ -1,0 +1,99 @@
+language_version: 0
+
+target:
+  name: fixture-order-service
+  repo: https://github.com/protoku/fixture-order-service
+  commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+  notes: >
+    Order service (Node, PostgreSQL) with a fake payment provider. Control and
+    evidence endpoints are enabled with FIXTURE_CONTROL=1. Defect flags are set
+    with FIXTURE_DEFECTS at startup; GET /__control/version lists the active
+    ones. Experiments in this corpus declare expected verdicts per flag.
+
+services:
+  order-service:
+    base_url: http://localhost:4000
+  payment-provider:
+    base_url: http://localhost:4100
+
+control:
+  reset:
+    - { service: order-service, method: POST, path: /__control/reset }
+    - { service: payment-provider, method: POST, path: /__control/reset }
+  quiesce: { service: order-service, method: POST, path: /__control/quiesce }
+  clock: { service: order-service, path: /__control/clock }
+  version: { service: order-service, path: /__control/version }
+  jobs:
+    fulfillment: { service: order-service, method: POST, path: /__control/jobs/fulfillment/run }
+  faults:
+    arm: { service: payment-provider, method: POST, path: /__control/arm }
+
+evidence:
+  sources:
+    http:
+      service: order-service
+      path: /__control/evidence/http
+      paging: { param: since, limit_param: limit, limit: 10000 }
+      fixture_time: known
+      notes: >
+        One record per inbound non-control request, written after the
+        connection closes. complete_through currently equals high_water_mark
+        even while requests are in flight (fixture issue: optimistic claim).
+        Always read after quiesce.
+    outbound:
+      service: order-service
+      path: /__control/evidence/outbound
+      paging: { param: since, limit_param: limit, limit: 10000 }
+      fixture_time: known
+      notes: >
+        One record per call to the provider, from the application's point of
+        view. outcome is response | timeout | connection_error | invalid_body.
+        This source is what the application knows; provider.ledger is what is
+        true.
+    db:
+      service: order-service
+      path: /__control/evidence/db
+      paging: { param: since, limit_param: limit, limit: 10000 }
+      fixture_time: known
+      notes: >
+        Row changes from triggers inside the writing transaction. Rolled-back
+        transactions leave gaps. complete_through is held back by open
+        application transactions (in-process registry). ids.txid groups a
+        transaction's changes.
+    provider.ledger:
+      service: payment-provider
+      path: /__control/ledger
+      paging: { param: since }
+      fixture_time: unknown
+      shape: flat
+      envelope:
+        kind: { prefix: "ledger.", from: type }
+        data: all
+      notes: >
+        Every charge and refund the provider actually recorded, including ones
+        whose response was dropped. Append-only in memory; a provider reset
+        empties it, which the runtime must detect as a high-water-mark
+        regression. Records are not enveloped; the mapping above puts the whole
+        record under data with kind ledger.charge or ledger.refund.
+    provider.requests:
+      service: payment-provider
+      path: /__control/requests
+      paging: { param: since }
+      fixture_time: unknown
+      shape: flat
+      envelope:
+        kind: { literal: provider.request }
+        data: all
+      notes: >
+        Every non-control request the provider received, including ones with no
+        response. Not required by any expectation in this corpus; useful for
+        coverage and for debugging fault arming.
+
+defect_flags:
+  - D1_fulfill_cancelled
+  - D2_timeout_as_failed
+  - D3_create_idempotency_ignored
+  - D4_cancel_fulfilled_allowed
+  - D5_negative_quantity_accepted
+  - D6_client_total_trusted
+  # D0 is the always-on race documented in the fixture's decision log; it has no flag.

@@ -1,0 +1,23 @@
+id: dec-001
+expectation: exp-order-transitions
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  Are these the only allowed order status changes: created→paid,
+  created→cancelled, paid→fulfilled, paid→cancelled, with fulfilled and
+  cancelled final?
+answer: confirm
+reasoning: >
+  The state machine in the fixture brief and README lists exactly these edges.
+  Independently of the code, a cancelled order must not ship and a shipped
+  order cannot be un-shipped by cancelling it. Note this rule judges the
+  sequence of states only; it says nothing about money, which the payments
+  rules cover.
+independent_sources:
+  - fixture-order-service/README.md state machine
+  - fixture brief §3
+confirmation: >
+  Drafted by the assistant from the brief and the fixture's decision log.
+  Committing this file to the repository is the product owner's confirmation;
+  until then it is a proposal.

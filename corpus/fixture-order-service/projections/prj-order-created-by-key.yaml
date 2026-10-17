@@ -1,0 +1,38 @@
+id: prj-order-created-by-key
+version: 1
+emits: order.created_by_key
+description: >
+  Per Idempotency-Key used on POST /orders, how many distinct orders were
+  returned and how many of the responses were a fresh 201. Judged from the HTTP
+  boundary because the idempotency table itself has no change evidence.
+
+group:
+  event: http.create_order
+  where:
+    - { path: status, in: [200, 201] }
+  by: idempotency_key
+map:
+  idempotency_key: { key: true }
+  order_count: { count_distinct: order_id }
+  create_count: { count: true, where: [{ path: status, equals: 201 }] }
+  replay_count: { count: true, where: [{ path: status, equals: 200 }] }
+
+examples:
+  - name: a replay returns the same order
+    input:
+      - { seq: 1, status: 201, idempotency_key: k1, order_id: o1 }
+      - { seq: 2, status: 200, idempotency_key: k1, order_id: o1 }
+    output:
+      - { idempotency_key: k1, order_count: 1, create_count: 1, replay_count: 1 }
+  - name: an ignored key creates two orders
+    input:
+      - { seq: 1, status: 201, idempotency_key: k1, order_id: o1 }
+      - { seq: 2, status: 201, idempotency_key: k1, order_id: o2 }
+    output:
+      - { idempotency_key: k1, order_count: 2, create_count: 2, replay_count: 0 }
+  - name: rejected requests do not count
+    input:
+      - { seq: 1, status: 201, idempotency_key: k1, order_id: o1 }
+      - { seq: 2, status: 422, idempotency_key: k1, order_id: null }
+    output:
+      - { idempotency_key: k1, order_count: 1, create_count: 1, replay_count: 0 }

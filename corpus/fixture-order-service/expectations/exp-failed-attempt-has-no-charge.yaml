@@ -1,0 +1,30 @@
+id: exp-failed-attempt-has-no-charge
+version: 1
+kind: invariant
+wording: >
+  If the provider holds a charge for a payment attempt, the service does not
+  record that attempt as failed. It may still be pending or unknown, or it may
+  be succeeded; "failed" means the service is sure no money moved, and it must
+  not be sure wrongly.
+provenance: human_authored
+governance:
+  status: confirmed
+  decision: dec-009
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: payments
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [db, provider.ledger]
+  completeness: required
+consequence: >
+  A service that marks a landed charge as failed will let a retry through and
+  will never reconcile it. This catches the ambiguous-outcome defect from the
+  service's bookkeeping alone, before any second charge happens.
+
+over: attempt.with_ledger_charge
+entity: attempt_id
+assert:
+  - { path: attempt_status, not_equals: failed }

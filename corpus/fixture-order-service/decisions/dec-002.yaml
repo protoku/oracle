@@ -1,0 +1,18 @@
+id: dec-002
+expectation: exp-order-total-equals-lines
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  Is an order's total always the sum of quantity × unit price over its lines,
+  with no discounts, fees, taxes or caller-provided totals?
+answer: confirm
+reasoning: >
+  The fixture has no pricing rules beyond the lines. The brief says a
+  client-sent total is ignored. If discounts or taxes are added later this
+  expectation must be deprecated and replaced, not silently loosened.
+independent_sources:
+  - fixture brief §3 (validation on create)
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

@@ -1,0 +1,50 @@
+id: xp-nonpositive-quantity
+hypothesis: >
+  Creates with a zero or negative line quantity are rejected with 422 and store
+  nothing. The declaration quantity ≥ 1 in openapi.yaml is only a hint of where
+  to probe; this experiment is what tests it.
+investigates:
+  - exp-create-rejects-nonpositive-quantity
+  - exp-line-quantity-positive
+  - exp-order-total-equals-lines
+target: fixture-order-service
+seed: 5
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: zero
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-zero" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 0, unit_price_cents: 500 }] }
+    note: under test; D5 accepts this with total 0
+  - id: negative
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-negative" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: -1, unit_price_cents: 500 }] }
+    note: under test; D5 reaches the database and fails its total check with a 500
+  - id: valid
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-valid" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 1, unit_price_cents: 500 }] }
+    expect_status: 201
+horizon: quiesce
+expected:
+  default:
+    exp-create-rejects-nonpositive-quantity: satisfied
+    exp-line-quantity-positive: satisfied
+    exp-order-total-equals-lines: satisfied
+  D5_negative_quantity_accepted:
+    exp-create-rejects-nonpositive-quantity: violated    # 201 and 500 instead of 422
+    exp-line-quantity-positive: violated                 # the quantity-0 line is stored
+    exp-order-total-equals-lines: satisfied              # 0 == 0
+coverage_expected:
+  - "POST /orders 500"                                   # only under D5; a 500 is never explained by an expectation

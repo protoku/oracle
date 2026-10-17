@@ -1,0 +1,33 @@
+id: exp-order-transitions
+version: 1
+kind: transition
+wording: >
+  An order starts as created. It can go from created to paid, from created to
+  cancelled, from paid to fulfilled, and from paid to cancelled. Fulfilled and
+  cancelled are final: nothing moves out of them.
+provenance: human_authored
+governance:
+  status: confirmed
+  decision: dec-001
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: order-lifecycle
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [db]
+  completeness: required
+consequence: >
+  A forbidden transition means goods ship for an order that was cancelled, or
+  an already shipped order is cancelled and refunded.
+
+over: order.status_changed
+entity: order_id
+rule:
+  allowed:
+    - { from: null, to: created }
+    - { from: created, to: paid }
+    - { from: created, to: cancelled }
+    - { from: paid, to: fulfilled }
+    - { from: paid, to: cancelled }

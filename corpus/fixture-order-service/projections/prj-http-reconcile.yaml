@@ -1,0 +1,27 @@
+id: prj-http-reconcile
+version: 1
+emits: http.reconcile
+description: One event per reconcile request, with its outcome. Used to close obligations that are open until the service has asked the provider what happened.
+
+from:
+  source: http
+  where:
+    - { path: data.route, equals: "/orders/:id/reconcile" }
+    - { path: data.method, equals: POST }
+map:
+  order_id: ids.order_id
+  status: data.status
+
+examples:
+  - name: a successful reconcile
+    input:
+      - { source: http, seq: 9, kind: http.request, trace_id: t9, ids: { order_id: o1 },
+          data: { method: POST, path: /orders/o1/reconcile, route: "/orders/:id/reconcile", status: 200 } }
+    output:
+      - { order_id: o1, status: 200 }
+  - name: a reconcile that could not reach the provider does not count as resolved
+    input:
+      - { source: http, seq: 10, kind: http.request, trace_id: t10, ids: { order_id: o1 },
+          data: { method: POST, path: /orders/o1/reconcile, route: "/orders/:id/reconcile", status: 502 } }
+    output:
+      - { order_id: o1, status: 502 }

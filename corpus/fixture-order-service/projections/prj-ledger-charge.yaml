@@ -1,0 +1,29 @@
+id: prj-ledger-charge
+version: 1
+emits: ledger.charge
+description: One event per charge the provider actually recorded. Environment truth; the service may not know about it.
+
+from:
+  source: provider.ledger
+  where:
+    - { path: kind, equals: ledger.charge }
+map:
+  charge_id: data.id
+  idempotency_key: data.idempotency_key
+  amount_cents: data.amount_cents
+  currency: data.currency
+  status: data.status
+  fault_applied: data.fault_applied
+
+examples:
+  - name: a charge recorded under a dropped response is still a charge
+    input:
+      - { source: provider.ledger, seq: 1, kind: ledger.charge, trace_id: t1, ids: {},
+          data: { type: charge, id: ch_1, idempotency_key: "o1:k1:1", amount_cents: 1000, currency: EUR, status: succeeded, fault_applied: commit_then_drop } }
+    output:
+      - { charge_id: ch_1, idempotency_key: "o1:k1:1", amount_cents: 1000, status: succeeded, fault_applied: commit_then_drop }
+  - name: refunds are not charges
+    input:
+      - { source: provider.ledger, seq: 2, kind: ledger.refund, ids: {},
+          data: { type: refund, id: re_1, charge_id: ch_1, idempotency_key: "a1:refund", amount_cents: 1000, status: succeeded } }
+    output: []

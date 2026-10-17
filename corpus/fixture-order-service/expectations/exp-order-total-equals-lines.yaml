@@ -1,0 +1,27 @@
+id: exp-order-total-equals-lines
+version: 1
+kind: invariant
+wording: >
+  An order's stored total is the sum over its lines of quantity times unit
+  price. The caller never decides the total.
+provenance: human_authored
+governance:
+  status: confirmed
+  decision: dec-002
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: pricing
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [db]
+  completeness: required
+consequence: >
+  A mismatch means a customer is charged an amount that does not correspond to
+  what they ordered.
+
+over: order.created_snapshot
+entity: order_id
+assert:
+  - { path: total_cents, equals: $.lines_sum }

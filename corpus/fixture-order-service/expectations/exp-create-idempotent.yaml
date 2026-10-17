@@ -1,0 +1,29 @@
+id: exp-create-idempotent
+version: 1
+kind: invariant
+wording: >
+  One Idempotency-Key on order creation yields one order. Repeating the request
+  returns that same order; it never creates a second one.
+provenance: human_authored
+governance:
+  status: confirmed
+  decision: dec-005
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: api-contract
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [http]
+  completeness: required
+consequence: >
+  A retried request (network blip, double click) places a second order and
+  charges the customer twice.
+
+over: order.created_by_key
+entity: idempotency_key
+assert:
+  - all_of:
+      - { path: order_count, lte: 1 }
+      - { path: create_count, lte: 1 }

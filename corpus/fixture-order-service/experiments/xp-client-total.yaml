@@ -1,0 +1,25 @@
+id: xp-client-total
+hypothesis: >
+  A total_cents sent by the caller is ignored; the stored total is computed
+  from the lines.
+investigates:
+  - exp-order-total-equals-lines
+target: fixture-order-service
+seed: 6
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, total_cents: 1, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    note: under test; clean build stores 1000
+horizon: quiesce
+expected:
+  default:
+    exp-order-total-equals-lines: satisfied
+  D6_client_total_trusted:
+    exp-order-total-equals-lines: violated               # stored 1, lines sum 1000

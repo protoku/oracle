@@ -1,0 +1,34 @@
+id: exp-create-rejects-nonpositive-quantity
+version: 1
+kind: invariant
+wording: >
+  A request to create an order with any line whose quantity is below one is
+  rejected with a validation error (422). It is not accepted, and it does not
+  fail some other way.
+provenance: declared
+declared_in:
+  - { file: openapi.yaml, path: components.schemas.OrderLineInput.properties.quantity.minimum, value: 1 }
+governance:
+  status: confirmed
+  decision: dec-004
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: order-validation
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [http]
+  completeness: required
+consequence: >
+  Accepting such a request creates an order for nothing or with a negative
+  total; failing with a 500 hides a validation problem as an outage. The
+  observation that the oracle can only detect this by sending such a request
+  (nothing happens on its own) is why this expectation exists next to the
+  storage invariant.
+
+over: http.create_order
+where:
+  - { path: lines, any: { path: quantity, lt: 1 } }
+assert:
+  - { path: status, equals: 422 }

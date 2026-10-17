@@ -1,0 +1,36 @@
+id: prj-attempt-latest
+version: 1
+emits: attempt.latest
+description: >
+  The last known status of each payment attempt, keyed by the provider key it
+  was sent under. A retried attempt reuses its row with a new provider key; the
+  old key's group keeps the status it had when the key was last current.
+
+group:
+  source: db
+  where:
+    - { path: data.table, equals: payment_attempts }
+    - { path: kind, in: [db.insert, db.update] }
+  by: data.new.provider_key
+map:
+  provider_key: { key: true }
+  attempt_id: { last: data.new.id }
+  order_id: { last: data.new.order_id }
+  status: { last: data.new.status }
+  charge_id: { last: data.new.provider_charge_id }
+
+examples:
+  - name: pending then unknown
+    input:
+      - { source: db, seq: 1, kind: db.insert, ids: { txid: 1 }, data: { table: payment_attempts, new: { id: a1, order_id: o1, provider_key: "o1:k1:1", status: pending } } }
+      - { source: db, seq: 2, kind: db.update, ids: { txid: 2 }, data: { table: payment_attempts, old: { status: pending }, new: { id: a1, order_id: o1, provider_key: "o1:k1:1", status: unknown } } }
+    output:
+      - { provider_key: "o1:k1:1", attempt_id: a1, order_id: o1, status: unknown }
+  - name: a retry under a new key leaves the old key's last status in place
+    input:
+      - { source: db, seq: 1, kind: db.insert, ids: { txid: 1 }, data: { table: payment_attempts, new: { id: a1, order_id: o1, provider_key: "o1:k1:1", status: pending } } }
+      - { source: db, seq: 2, kind: db.update, ids: { txid: 2 }, data: { table: payment_attempts, new: { id: a1, order_id: o1, provider_key: "o1:k1:1", status: failed } } }
+      - { source: db, seq: 3, kind: db.update, ids: { txid: 3 }, data: { table: payment_attempts, new: { id: a1, order_id: o1, provider_key: "o1:k1:2", status: pending } } }
+    output:
+      - { provider_key: "o1:k1:1", attempt_id: a1, status: failed }
+      - { provider_key: "o1:k1:2", attempt_id: a1, status: pending }

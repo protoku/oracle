@@ -1,0 +1,51 @@
+id: prj-order-at-create
+version: 1
+emits: order.created_snapshot
+description: >
+  The order row and its lines as inserted in one transaction, with the sum of
+  the lines computed from the evidence so that it can be compared to the stored
+  total. One event per creating transaction.
+
+group:
+  source: db
+  where:
+    - { path: kind, equals: db.insert }
+    - { path: data.table, in: [orders, order_lines] }
+  by: ids.txid
+map:
+  txid: { key: true }
+  order_id: { first: ids.order_id }
+  total_cents: { first: data.new.total_cents, where: [{ path: data.table, equals: orders }] }
+  lines_sum: { sum_product: [data.new.quantity, data.new.unit_price_cents], where: [{ path: data.table, equals: order_lines }] }
+  min_quantity: { min: data.new.quantity, where: [{ path: data.table, equals: order_lines }] }
+  line_count: { count: true, where: [{ path: data.table, equals: order_lines }] }
+
+examples:
+  - name: total and line sum are both computed
+    input:
+      - { source: db, seq: 1, kind: db.insert, ids: { order_id: o1, txid: 10 },
+          data: { table: orders, new: { id: o1, total_cents: 3499 } } }
+      - { source: db, seq: 2, kind: db.insert, ids: { order_id: o1, txid: 10 },
+          data: { table: order_lines, new: { id: l1, quantity: 2, unit_price_cents: 1250 } } }
+      - { source: db, seq: 3, kind: db.insert, ids: { order_id: o1, txid: 10 },
+          data: { table: order_lines, new: { id: l2, quantity: 1, unit_price_cents: 999 } } }
+    output:
+      - { txid: 10, order_id: o1, total_cents: 3499, lines_sum: 3499, min_quantity: 1, line_count: 2 }
+  - name: a client-trusted total shows as a mismatch, not as an error
+    input:
+      - { source: db, seq: 4, kind: db.insert, ids: { order_id: o2, txid: 11 },
+          data: { table: orders, new: { id: o2, total_cents: 1 } } }
+      - { source: db, seq: 5, kind: db.insert, ids: { order_id: o2, txid: 11 },
+          data: { table: order_lines, new: { id: l3, quantity: 2, unit_price_cents: 500 } } }
+    output:
+      - { txid: 11, order_id: o2, total_cents: 1, lines_sum: 1000, min_quantity: 2, line_count: 1 }
+  - name: inserts of other tables in the same transaction are not counted
+    input:
+      - { source: db, seq: 6, kind: db.insert, ids: { order_id: o3, txid: 12 },
+          data: { table: orders, new: { id: o3, total_cents: 0 } } }
+      - { source: db, seq: 7, kind: db.insert, ids: { order_id: o3, txid: 12 },
+          data: { table: order_lines, new: { id: l4, quantity: 0, unit_price_cents: 500 } } }
+      - { source: db, seq: 8, kind: db.insert, ids: { order_id: o3, attempt_id: a1, txid: 12 },
+          data: { table: payment_attempts, new: { id: a1, amount_cents: 0 } } }
+    output:
+      - { txid: 12, order_id: o3, total_cents: 0, lines_sum: 0, min_quantity: 0, line_count: 1 }

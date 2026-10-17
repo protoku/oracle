@@ -1,0 +1,53 @@
+# Technical names → business meaning. Used to render expectations and verdicts
+# for people; never consulted by the kernel.
+
+entities:
+  order:
+    table: app.orders
+    id: order_id
+    meaning: A customer's purchase. Carries a status, a total in cents and a version that increments on every status change.
+  order_line:
+    table: app.order_lines
+    id: line_id
+    meaning: One SKU and quantity on an order.
+  payment_attempt:
+    table: app.payment_attempts
+    id: attempt_id
+    meaning: One try to charge the customer for an order. Identified towards the provider by provider_key.
+  refund:
+    table: app.refunds
+    id: refund_id
+    meaning: One try to give the money of a succeeded payment attempt back.
+  fulfillment:
+    table: app.fulfillments
+    id: fulfillment_id
+    meaning: The record that goods for an order were shipped. At most one per order by database constraint.
+  outbox_event:
+    table: app.outbox_events
+    id: event_id
+    meaning: A business event the service emitted (order.paid, order.cancelled, order.fulfilled). The fulfillment job consumes order.paid events.
+
+states:
+  order.status:
+    created: Placed, not yet paid.
+    paid: Payment succeeded; waiting for fulfillment.
+    fulfilled: Goods shipped. Terminal.
+    cancelled: Will not be shipped. If it was paid, the charge was refunded. Terminal.
+  payment_attempt.status:
+    pending: The provider has been or is about to be asked.
+    succeeded: The provider confirmed the charge.
+    failed: The provider declined, or the service believes no charge happened.
+    unknown: The service does not know whether the charge happened. Must be reconciled before any new attempt.
+  refund.status:
+    pending: In flight.
+    succeeded: The provider confirmed the refund.
+    failed: The provider refused.
+    unknown: The service does not know whether the refund happened.
+
+terms:
+  provider_key: The idempotency key the service sends to the provider for a charge or refund. Same key means same logical operation.
+  client_key: The Idempotency-Key header a caller sends to the service.
+  ambiguous outcome: A provider call that ended in timeout, connection error, unparseable body or an unexpected status. The service cannot know whether money moved.
+  reconcile: Asking the provider what happened to attempts or refunds whose outcome was unknown.
+  fulfillment job: The background run that turns order.paid events into fulfillments. Triggered through the control API in experiments.
+  ledger: The provider's own record of charges and refunds that actually happened. The environment's truth, as opposed to what the service believes.

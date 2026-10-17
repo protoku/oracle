@@ -1,0 +1,24 @@
+id: dec-007
+expectation: exp-no-new-charge-after-ambiguous-outcome
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  After a charge call with no clear answer, may the service send another
+  charge for the same order under a new key before it has reconciled? And does
+  "no clear answer" include an unexpected HTTP status such as 500 or 409, not
+  only timeouts?
+answer: confirm
+reasoning: >
+  This is the service's obligation in the ambiguous-outcome class, the one
+  class that cannot be waived for operations that move money. It is written
+  over evidence the service possesses (its outbound calls, its reconcile
+  requests), not over the provider's state, because in production the service
+  cannot see the provider's state until it asks. Unexpected statuses are
+  included: the service cannot know whether a 500 happened before or after the
+  provider committed.
+independent_sources:
+  - design-addendum §3 and §6
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

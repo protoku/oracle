@@ -1,0 +1,44 @@
+id: xp-ambiguous-charge-unresolved
+hypothesis: >
+  After a charge call times out and nobody reconciles, the no-new-charge
+  obligation is still open at the horizon: pending, not satisfied and not
+  violated.
+investigates:
+  - exp-no-new-charge-after-ambiguous-outcome
+  - exp-charge-at-most-once-per-order
+  - exp-failed-attempt-has-no-charge
+target: fixture-order-service
+seed: 10
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: arm
+    http:
+      service: payment-provider
+      method: POST
+      path: /__control/arm
+      body: { trace_id: "{{run}}-pay1", fault: { kind: timeout, ms: 5000 }, times: 1 }
+    expect_status: 200
+  - id: pay1
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k1, x-trace-id: "{{run}}-pay1" }
+      body: { source: tok_ok }
+    note: under test; the service gives up after PROVIDER_TIMEOUT_MS and answers 502
+horizon: quiesce
+expected:
+  default:
+    exp-no-new-charge-after-ambiguous-outcome: pending     # window never closed, nothing forbidden observed
+    exp-charge-at-most-once-per-order: satisfied           # zero charges
+    exp-failed-attempt-has-no-charge: not_applicable       # no attempt has a ledger charge

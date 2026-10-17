@@ -1,0 +1,33 @@
+id: prj-order-outcome
+version: 1
+emits: order.outcome
+description: >
+  Per order, at the horizon: how many fulfillments exist and how many refunds
+  succeeded, from the service's own records. Both at once means the customer
+  got the goods and the money.
+
+group:
+  source: db
+  where:
+    - { path: data.table, in: [fulfillments, refunds] }
+    - { path: kind, in: [db.insert, db.update] }
+  by: ids.order_id
+map:
+  order_id: { key: true }
+  fulfillment_count: { count_distinct: data.new.id, where: [{ path: data.table, equals: fulfillments }] }
+  succeeded_refund_count: { count_distinct: data.new.id, where: [{ path: data.table, equals: refunds }, { path: data.new.status, equals: succeeded }] }
+
+examples:
+  - name: fulfilled and refunded
+    input:
+      - { source: db, seq: 1, kind: db.insert, ids: { order_id: o1, refund_id: r1, txid: 1 }, data: { table: refunds, new: { id: r1, status: pending } } }
+      - { source: db, seq: 2, kind: db.insert, ids: { order_id: o1, txid: 2 }, data: { table: fulfillments, new: { id: f1, order_id: o1 } } }
+      - { source: db, seq: 3, kind: db.update, ids: { order_id: o1, refund_id: r1, txid: 3 }, data: { table: refunds, old: { status: pending }, new: { id: r1, status: succeeded } } }
+    output:
+      - { order_id: o1, fulfillment_count: 1, succeeded_refund_count: 1 }
+  - name: a failed refund does not count
+    input:
+      - { source: db, seq: 1, kind: db.insert, ids: { order_id: o2, refund_id: r2, txid: 4 }, data: { table: refunds, new: { id: r2, status: pending } } }
+      - { source: db, seq: 2, kind: db.update, ids: { order_id: o2, refund_id: r2, txid: 5 }, data: { table: refunds, new: { id: r2, status: failed } } }
+    output:
+      - { order_id: o2, fulfillment_count: 0, succeeded_refund_count: 0 }

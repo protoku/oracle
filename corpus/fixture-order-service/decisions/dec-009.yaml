@@ -1,0 +1,20 @@
+id: dec-009
+expectation: exp-failed-attempt-has-no-charge
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  When the provider holds a charge for an attempt, is it ever acceptable for
+  the service to record that attempt as failed?
+answer: confirm
+reasoning: >
+  "failed" is the service asserting that no money moved. If the provider has
+  the charge, that assertion is false and leads to retries and never to
+  reconciliation. pending, unknown and succeeded are all acceptable states for
+  an attempt with a landed charge; failed is not. The rule says nothing about
+  attempts without a charge.
+independent_sources:
+  - vocabulary.yaml (payment_attempt.status meanings)
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

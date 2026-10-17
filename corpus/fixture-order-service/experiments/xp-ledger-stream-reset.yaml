@@ -1,0 +1,46 @@
+id: xp-ledger-stream-reset
+hypothesis: >
+  If the provider's ledger is emptied mid-run, every expectation that needs the
+  ledger comes back inconclusive, never satisfied. The runtime must detect the
+  high-water-mark regression; nothing in the evidence announces the reset.
+investigates:
+  - exp-charge-at-most-once-per-order
+  - exp-failed-attempt-has-no-charge
+  - exp-order-transitions
+target: fixture-order-service
+seed: 9
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: pay
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k1, x-trace-id: "{{run}}-pay" }
+      body: { source: tok_ok }
+    expect_status: 200
+  - id: mark
+    evidence_mark: true                                    # ledger high_water_mark is 1 here
+  - id: lose-the-ledger
+    http:
+      service: payment-provider
+      method: POST
+      path: /__control/reset
+    expect_status: 200
+    note: simulates an observation-system failure, not a business action
+horizon: quiesce
+expected:
+  default:
+    exp-charge-at-most-once-per-order: inconclusive        # provider.ledger unreliable: high_water_mark went 1 → 0
+    exp-failed-attempt-has-no-charge: inconclusive
+    exp-order-transitions: satisfied                       # db evidence is intact

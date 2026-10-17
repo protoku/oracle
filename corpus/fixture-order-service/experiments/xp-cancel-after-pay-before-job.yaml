@@ -1,0 +1,57 @@
+id: xp-cancel-after-pay-before-job
+hypothesis: >
+  A paid order that is cancelled before the fulfillment job runs is refunded
+  and never fulfilled; the job skips it.
+investigates:
+  - exp-order-transitions
+  - exp-fulfilled-and-refunded-exclusive
+  - exp-charge-at-most-once-per-order
+  - exp-failed-attempt-has-no-charge
+target: fixture-order-service
+seed: 2
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: pay
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k1, x-trace-id: "{{run}}-pay" }
+      body: { source: tok_ok }
+    expect_status: 200
+  - id: cancel
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/cancel"
+      headers: { x-trace-id: "{{run}}-cancel" }
+    note: under test; refunds the charge
+  - id: job
+    http:
+      service: order-service
+      method: POST
+      path: /__control/jobs/fulfillment/run
+      headers: { x-trace-id: "{{run}}-job" }
+    note: under test; must skip the cancelled order
+horizon: quiesce
+expected:
+  default:
+    exp-order-transitions: satisfied
+    exp-fulfilled-and-refunded-exclusive: satisfied
+    exp-charge-at-most-once-per-order: satisfied
+    exp-failed-attempt-has-no-charge: satisfied
+  D1_fulfill_cancelled:
+    exp-order-transitions: violated          # cancelled → fulfilled
+    exp-fulfilled-and-refunded-exclusive: violated
+    exp-charge-at-most-once-per-order: satisfied
+    exp-failed-attempt-has-no-charge: satisfied

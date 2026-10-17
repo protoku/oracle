@@ -1,0 +1,19 @@
+id: dec-003
+expectation: exp-line-quantity-positive
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  The OpenAPI document declares quantity minimum 1. Is that the intent for
+  stored lines too, or only for the request schema?
+answer: confirm
+reasoning: >
+  A declaration in the API schema is a developer's belief, not intent, so it
+  was put to the owner rather than adopted. The owner's intent is that no line
+  with quantity below one exists anywhere. The database schema deliberately has
+  no CHECK on quantity, so storage does not enforce this; evidence does.
+independent_sources:
+  - fixture-order-service/openapi.yaml (declared, minimum: 1)
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

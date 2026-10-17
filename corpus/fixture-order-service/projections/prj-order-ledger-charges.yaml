@@ -1,0 +1,29 @@
+id: prj-order-ledger-charges
+version: 1
+emits: order.ledger_charges
+description: >
+  Per order, how many distinct charges the provider holds. Counted by charge id
+  so that an idempotent replay (two calls, one key, one charge) counts once.
+
+group:
+  event: charge.call_vs_ledger
+  by: order_id
+map:
+  order_id: { key: true }
+  call_count: { count: true }
+  ledger_charge_count: { count_distinct: charge_id, where: [{ path: ledger_recorded, equals: true }] }
+  ambiguous_call_count: { count: true, where: [{ path: outcome, in: [timeout, connection_error, invalid_body] }] }
+
+examples:
+  - name: a replayed key is one charge
+    input:
+      - { seq: 1, order_id: o1, idempotency_key: "o1:k1:1", ledger_recorded: true, charge_id: ch_1, outcome: response }
+      - { seq: 2, order_id: o1, idempotency_key: "o1:k1:1", ledger_recorded: true, charge_id: ch_1, outcome: response }
+    output:
+      - { order_id: o1, call_count: 2, ledger_charge_count: 1, ambiguous_call_count: 0 }
+  - name: two keys that both landed are two charges
+    input:
+      - { seq: 1, order_id: o1, idempotency_key: "o1:k1:1", ledger_recorded: true, charge_id: ch_1, outcome: connection_error }
+      - { seq: 2, order_id: o1, idempotency_key: "o1:k2:1", ledger_recorded: true, charge_id: ch_2, outcome: response }
+    output:
+      - { order_id: o1, call_count: 2, ledger_charge_count: 2, ambiguous_call_count: 1 }

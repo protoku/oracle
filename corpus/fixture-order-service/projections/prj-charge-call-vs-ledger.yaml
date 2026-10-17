@@ -1,0 +1,40 @@
+id: prj-charge-call-vs-ledger
+version: 1
+emits: charge.call_vs_ledger
+description: >
+  Each charge call the service made, paired with the ledger entry the provider
+  holds for the same idempotency key, if any. The join needs no key parsing:
+  the service's outbound record carries the key it sent and the ledger carries
+  the key it received. This is where "what the application knows" meets "what
+  is true".
+
+join:
+  left: { event: outbound.charge_call, key: idempotency_key }
+  right: { event: ledger.charge, key: idempotency_key }
+  type: left
+map:
+  order_id: $left.order_id
+  attempt_id: $left.attempt_id
+  idempotency_key: $left.idempotency_key
+  outcome: $left.outcome
+  status: $left.status
+  ledger_recorded: { exists: right }
+  charge_id: $right.charge_id
+  fault_applied: $right.fault_applied
+
+examples:
+  - name: a timed-out call whose charge landed anyway
+    input:
+      outbound.charge_call:
+        - { seq: 1, order_id: o1, attempt_id: a1, idempotency_key: "o1:k1:1", outcome: timeout, status: null }
+      ledger.charge:
+        - { seq: 1, charge_id: ch_1, idempotency_key: "o1:k1:1", fault_applied: commit_then_drop }
+    output:
+      - { order_id: o1, idempotency_key: "o1:k1:1", outcome: timeout, ledger_recorded: true, charge_id: ch_1 }
+  - name: a call the provider never recorded
+    input:
+      outbound.charge_call:
+        - { seq: 2, order_id: o1, attempt_id: a1, idempotency_key: "o1:k1:1", outcome: timeout, status: null }
+      ledger.charge: []
+    output:
+      - { order_id: o1, idempotency_key: "o1:k1:1", outcome: timeout, ledger_recorded: false, charge_id: null }

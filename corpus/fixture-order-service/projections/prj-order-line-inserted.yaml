@@ -1,0 +1,25 @@
+id: prj-order-line-inserted
+version: 1
+emits: order_line.inserted
+description: One event per order line row as stored.
+
+from:
+  source: db
+  where:
+    - { path: data.table, equals: order_lines }
+    - { path: kind, equals: db.insert }
+map:
+  order_id: ids.order_id
+  line_id: data.new.id
+  sku: data.new.sku
+  quantity: data.new.quantity
+  unit_price_cents: data.new.unit_price_cents
+  txid: ids.txid
+
+examples:
+  - name: a stored line is emitted as is
+    input:
+      - { source: db, seq: 2, kind: db.insert, ids: { order_id: o1, txid: 10 },
+          data: { table: order_lines, new: { id: l1, sku: A, quantity: 0, unit_price_cents: 500 } } }
+    output:
+      - { order_id: o1, line_id: l1, sku: A, quantity: 0, unit_price_cents: 500, txid: 10 }

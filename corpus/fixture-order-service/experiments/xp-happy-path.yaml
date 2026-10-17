@@ -1,0 +1,56 @@
+id: xp-happy-path
+hypothesis: >
+  Create, pay, and one fulfillment run leave every expectation satisfied or not
+  applicable, on the clean build and under every defect flag.
+investigates:
+  - exp-order-transitions
+  - exp-order-total-equals-lines
+  - exp-line-quantity-positive
+  - exp-create-rejects-nonpositive-quantity
+  - exp-create-idempotent
+  - exp-charge-at-most-once-per-order
+  - exp-no-new-charge-after-ambiguous-outcome
+  - exp-fulfilled-and-refunded-exclusive
+  - exp-failed-attempt-has-no-charge
+target: fixture-order-service
+seed: 1
+setup:
+  reset: [order-service, payment-provider]
+  clock: { set: "2026-01-15T10:00:00Z" }
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 2, unit_price_cents: 500 }, { sku: B, quantity: 1, unit_price_cents: 2499 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: pay
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k1, x-trace-id: "{{run}}-pay" }
+      body: { source: tok_ok }
+    note: under test
+  - id: job
+    http:
+      service: order-service
+      method: POST
+      path: /__control/jobs/fulfillment/run
+      headers: { x-trace-id: "{{run}}-job" }
+    note: under test
+horizon: quiesce
+expected:
+  default:
+    exp-order-transitions: satisfied
+    exp-order-total-equals-lines: satisfied
+    exp-line-quantity-positive: satisfied
+    exp-create-rejects-nonpositive-quantity: not_applicable
+    exp-create-idempotent: satisfied
+    exp-charge-at-most-once-per-order: satisfied
+    exp-no-new-charge-after-ambiguous-outcome: not_applicable
+    exp-fulfilled-and-refunded-exclusive: satisfied
+    exp-failed-attempt-has-no-charge: satisfied

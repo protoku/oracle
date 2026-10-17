@@ -1,0 +1,42 @@
+id: prj-order-status-changed
+version: 1
+emits: order.status_changed
+description: One event per change of an order's status, including creation as a change from null.
+
+from:
+  source: db
+  where:
+    - { path: data.table, equals: orders }
+    - { path: kind, in: [db.insert, db.update] }
+map:
+  order_id: ids.order_id
+  from: data.old.status
+  to: data.new.status
+  version: data.new.version
+  txid: ids.txid
+keep:
+  - { path: from, not_equals: $.to }
+
+examples:
+  - name: creation is a change from null
+    input:
+      - { source: db, seq: 1, kind: db.insert, trace_id: t1, ids: { order_id: o1, txid: 10 },
+          data: { table: orders, old: null, new: { id: o1, status: created, version: 1 } } }
+    output:
+      - { order_id: o1, from: null, to: created, version: 1, txid: 10 }
+  - name: status update is emitted
+    input:
+      - { source: db, seq: 2, kind: db.update, trace_id: t2, ids: { order_id: o1, txid: 11 },
+          data: { table: orders, old: { id: o1, status: created, version: 1 }, new: { id: o1, status: paid, version: 2 } } }
+    output:
+      - { order_id: o1, from: created, to: paid, version: 2, txid: 11 }
+  - name: other tables are ignored
+    input:
+      - { source: db, seq: 3, kind: db.insert, ids: { order_id: o1, txid: 12 },
+          data: { table: order_lines, old: null, new: { id: l1, order_id: o1, quantity: 2 } } }
+    output: []
+  - name: an update that keeps the status is dropped
+    input:
+      - { source: db, seq: 4, kind: db.update, ids: { order_id: o1, txid: 13 },
+          data: { table: orders, old: { status: paid, version: 2 }, new: { status: paid, version: 3 } } }
+    output: []

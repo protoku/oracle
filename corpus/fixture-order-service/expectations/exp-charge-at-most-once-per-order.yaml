@@ -1,0 +1,28 @@
+id: exp-charge-at-most-once-per-order
+version: 1
+kind: invariant
+wording: >
+  The payment provider holds at most one charge for any order, whatever the
+  service believed happened along the way.
+provenance: human_authored
+governance:
+  status: confirmed
+  decision: dec-006
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: payments
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [outbound, provider.ledger]
+  completeness: required
+consequence: >
+  Two charges for one order is a double charge. This is judged against the
+  provider's ledger, not the service's tables: it is the environment's truth,
+  and the service can be wrong about it.
+
+over: order.ledger_charges
+entity: order_id
+assert:
+  - { path: ledger_charge_count, lte: 1 }

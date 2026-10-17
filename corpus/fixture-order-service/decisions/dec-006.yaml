@@ -1,0 +1,19 @@
+id: dec-006
+expectation: exp-charge-at-most-once-per-order
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  May the provider ever hold more than one charge for one order, for example a
+  failed first attempt followed by a successful second one?
+answer: confirm
+reasoning: >
+  A declined charge is not recorded by the provider, so a decline followed by a
+  success leaves one ledger entry. Two ledger entries therefore always mean the
+  customer paid twice. The rule is judged against the provider's ledger on
+  purpose: the service's own tables can say "failed" while the money moved.
+independent_sources:
+  - fixture-order-service/docs/decisions.md ("Declines are not recorded by the provider")
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

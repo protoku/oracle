@@ -1,0 +1,20 @@
+id: dec-004
+expectation: exp-create-rejects-nonpositive-quantity
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  When a create request contains a line with quantity below one, is the only
+  acceptable response a 422? In particular, is a 500 (for example from a
+  database constraint on the total) acceptable?
+answer: confirm
+reasoning: >
+  The owner wants validation errors reported as validation errors. A 500 hides
+  a validation gap as an outage and tells the caller nothing. This rule is the
+  API-level twin of dec-003 and exists because the storage invariant can only
+  fire once a bad row exists, while this one fires on the request itself.
+independent_sources:
+  - fixture-order-service/openapi.yaml (declared, minimum: 1)
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

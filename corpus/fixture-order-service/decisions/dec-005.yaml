@@ -1,0 +1,19 @@
+id: dec-005
+expectation: exp-create-idempotent
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  Does one Idempotency-Key on POST /orders always map to at most one order,
+  with repeats returning that order?
+answer: confirm
+reasoning: >
+  This is the documented contract and the reason the header is required. The
+  rule is judged from the HTTP boundary because the idempotency table has no
+  change evidence; if that table gets a trigger later, a storage-level twin can
+  be added.
+independent_sources:
+  - fixture-order-service/README.md API table
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

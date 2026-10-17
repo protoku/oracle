@@ -1,0 +1,36 @@
+id: prj-attempt-vs-ledger
+version: 1
+emits: attempt.with_ledger_charge
+description: >
+  Each payment attempt whose provider key has a charge in the provider's
+  ledger, with the attempt's last known status. Only attempts with a real
+  charge appear; the pair exposes a service that believes no money moved when
+  it did.
+
+join:
+  left: { event: attempt.latest, key: provider_key }
+  right: { event: ledger.charge, key: idempotency_key }
+  type: inner
+map:
+  attempt_id: $left.attempt_id
+  order_id: $left.order_id
+  provider_key: $left.provider_key
+  attempt_status: $left.status
+  charge_id: $right.charge_id
+  fault_applied: $right.fault_applied
+
+examples:
+  - name: an attempt marked failed while the provider holds the charge
+    input:
+      attempt.latest:
+        - { seq: 2, provider_key: "o1:k1:1", attempt_id: a1, order_id: o1, status: failed }
+      ledger.charge:
+        - { seq: 1, charge_id: ch_1, idempotency_key: "o1:k1:1", fault_applied: commit_then_drop }
+    output:
+      - { attempt_id: a1, order_id: o1, attempt_status: failed, charge_id: ch_1 }
+  - name: an attempt with no charge is not emitted
+    input:
+      attempt.latest:
+        - { seq: 2, provider_key: "o1:k1:1", attempt_id: a1, order_id: o1, status: unknown }
+      ledger.charge: []
+    output: []

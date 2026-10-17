@@ -1,0 +1,48 @@
+id: exp-no-new-charge-after-ambiguous-outcome
+version: 1
+kind: obligation
+wording: >
+  When a charge call ends without a clear answer (timeout, dropped connection,
+  unreadable body, or an unexpected status), the service sends no further
+  charge for that order under a different key until it has successfully
+  reconciled the order with the provider.
+provenance: human_authored
+governance:
+  status: confirmed
+  decision: dec-007
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: payments
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [outbound, http]
+  completeness: required
+consequence: >
+  This is the service's obligation in the ambiguous-outcome failure class. It
+  is written only over what the service can know: its own outbound calls and
+  its own reconcile requests. Whether the first charge actually landed is the
+  experiment's business, not this rule's. Breaking it is how double charges
+  happen.
+
+when:
+  event: outbound.charge_call
+  where:
+    - any_of:
+        - { path: outcome, in: [timeout, connection_error, invalid_body] }
+        - all_of:
+            - { path: outcome, equals: response }
+            - { path: status, not_in: [200, 201, 402] }
+correlate_by:
+  order_id: $trigger.order_id
+forbid:
+  event: outbound.charge_call
+  where:
+    - { path: idempotency_key, not_equals: $trigger.idempotency_key }
+window:
+  until:
+    event: http.reconcile
+    where:
+      - { path: order_id, equals: $trigger.order_id }
+      - { path: status, equals: 200 }

@@ -1,0 +1,28 @@
+id: exp-line-quantity-positive
+version: 1
+kind: invariant
+wording: >
+  Every stored order line has a quantity of at least one.
+provenance: declared
+declared_in:
+  - { file: openapi.yaml, path: components.schemas.OrderLineInput.properties.quantity.minimum, value: 1 }
+governance:
+  status: confirmed
+  decision: dec-003
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: order-validation
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [db]
+  completeness: required
+consequence: >
+  A zero or negative quantity in storage means an order for nothing, or a
+  negative total, reached the database.
+
+over: order_line.inserted
+entity: order_id
+assert:
+  - { path: quantity, gte: 1 }

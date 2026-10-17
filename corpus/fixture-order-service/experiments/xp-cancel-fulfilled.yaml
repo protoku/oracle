@@ -1,0 +1,52 @@
+id: xp-cancel-fulfilled
+hypothesis: >
+  Cancelling a fulfilled order is refused and moves nothing.
+investigates:
+  - exp-order-transitions
+  - exp-fulfilled-and-refunded-exclusive
+target: fixture-order-service
+seed: 3
+setup:
+  reset: [order-service, payment-provider]
+steps:
+  - id: create
+    http:
+      service: order-service
+      method: POST
+      path: /orders
+      headers: { Idempotency-Key: "{{uuid}}", x-trace-id: "{{run}}-create" }
+      body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 1, unit_price_cents: 1999 }] }
+    capture: { order_id: $.id }
+    expect_status: 201
+  - id: pay
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/pay"
+      headers: { Idempotency-Key: k1, x-trace-id: "{{run}}-pay" }
+      body: { source: tok_ok }
+    expect_status: 200
+  - id: job
+    http:
+      service: order-service
+      method: POST
+      path: /__control/jobs/fulfillment/run
+      headers: { x-trace-id: "{{run}}-job" }
+    expect_status: 200
+  - id: cancel
+    http:
+      service: order-service
+      method: POST
+      path: "/orders/{{order_id}}/cancel"
+      headers: { x-trace-id: "{{run}}-cancel" }
+    note: under test; clean build answers 409 invalid_transition
+horizon: quiesce
+expected:
+  default:
+    exp-order-transitions: satisfied
+    exp-fulfilled-and-refunded-exclusive: satisfied
+  D4_cancel_fulfilled_allowed:
+    exp-order-transitions: violated          # fulfilled → cancelled
+    exp-fulfilled-and-refunded-exclusive: violated
+coverage_expected:
+  - "POST /orders/:id/cancel 409"            # the refusal itself has no expectation yet

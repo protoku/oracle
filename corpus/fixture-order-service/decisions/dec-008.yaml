@@ -1,0 +1,22 @@
+id: dec-008
+expectation: exp-fulfilled-and-refunded-exclusive
+version: 1
+date: 2026-10-17
+authority: jeroen@herczeg.be (product owner, fixture-order-service)
+question: >
+  Is there any legitimate case in which an order has both a fulfillment and a
+  succeeded refund, for example a goodwill refund after shipping?
+answer: confirm
+reasoning: >
+  The fixture has no goodwill or partial refunds; a refund only happens on
+  cancel. Fulfilled plus refunded therefore always means the customer got both
+  goods and money. The clean fixture can reach this state through the race the
+  fixture's decision log documents ("Refund completion checks the order
+  version"); the owner's intent is that the state is wrong regardless of how
+  it was reached. Whether to fix the fixture is a separate decision; this rule
+  records what should be true.
+independent_sources:
+  - fixture-order-service/docs/decisions.md ("Refund completion checks the order version")
+confirmation: >
+  Drafted by the assistant. Committing this file is the product owner's
+  confirmation.

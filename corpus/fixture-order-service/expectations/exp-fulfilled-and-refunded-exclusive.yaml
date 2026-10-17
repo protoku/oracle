@@ -1,0 +1,33 @@
+id: exp-fulfilled-and-refunded-exclusive
+version: 1
+kind: invariant
+wording: >
+  No order is both fulfilled and refunded. If the goods shipped, the money
+  stays; if the money went back, the goods do not ship.
+provenance: human_authored
+governance:
+  status: confirmed
+  decision: dec-008
+owner:
+  authority: jeroen@herczeg.be (product owner, fixture-order-service)
+  domain: payments
+applicability:
+  target: fixture-order-service
+  since_commit: 4c17f899f28912f9b6aad79498802ab5dc76e56a
+evidence:
+  required: [db]
+  completeness: required
+consequence: >
+  The customer receives the goods and the refund. In the clean fixture this can
+  happen through a race between a slow refund and the fulfillment job; the
+  fixture's own decision log records that race as deliberately left in place.
+  This expectation is the one the oracle should violate on the clean build
+  without any defect flag.
+
+over: order.outcome
+entity: order_id
+assert:
+  - not:
+      all_of:
+        - { path: fulfillment_count, gte: 1 }
+        - { path: succeeded_refund_count, gte: 1 }

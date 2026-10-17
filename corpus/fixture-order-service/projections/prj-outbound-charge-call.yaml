@@ -1,0 +1,31 @@
+id: prj-outbound-charge-call
+version: 1
+emits: outbound.charge_call
+description: One event per charge request the service sent to the provider, as the service saw it end.
+
+from:
+  source: outbound
+  where:
+    - { path: data.method, equals: POST }
+    - { path: data.path, equals: /charges }
+map:
+  order_id: ids.order_id
+  attempt_id: ids.attempt_id
+  idempotency_key: data.request_headers.idempotency-key
+  outcome: data.outcome
+  status: data.status
+  charge_id: data.response_body.id
+
+examples:
+  - name: a dropped response is a connection error with no status
+    input:
+      - { source: outbound, seq: 1, kind: outbound.call, trace_id: t1, ids: { order_id: o1, attempt_id: a1 },
+          data: { target: payment-provider, method: POST, path: /charges,
+                  request_headers: { idempotency-key: "o1:k1:1" }, outcome: connection_error, status: null, response_body: null } }
+    output:
+      - { order_id: o1, attempt_id: a1, idempotency_key: "o1:k1:1", outcome: connection_error, status: null, charge_id: null }
+  - name: refund calls are not charge calls
+    input:
+      - { source: outbound, seq: 2, kind: outbound.call, ids: { order_id: o1 },
+          data: { method: POST, path: /charges/ch_1/refunds, outcome: response, status: 201 } }
+    output: []

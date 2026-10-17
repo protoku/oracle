@@ -1,0 +1,41 @@
+id: prj-http-create-order
+version: 1
+emits: http.create_order
+description: One event per POST /orders as seen at the HTTP boundary, with the request's lines and the response status.
+
+from:
+  source: http
+  where:
+    - { path: data.route, equals: /orders }
+    - { path: data.method, equals: POST }
+map:
+  status: data.status
+  idempotency_key: data.request_headers.idempotency-key
+  lines: data.request_body.lines
+  client_total_cents: data.request_body.total_cents
+  order_id: data.response_body.id
+
+examples:
+  - name: a create request carries its lines and status
+    input:
+      - { source: http, seq: 1, kind: http.request, trace_id: t1, ids: { order_id: o1 },
+          data: { method: POST, path: /orders, route: /orders, status: 201,
+                  request_headers: { idempotency-key: k1 },
+                  request_body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: -1, unit_price_cents: 500 }] },
+                  response_body: { id: o1, status: created } } }
+    output:
+      - { status: 201, idempotency_key: k1, order_id: o1, lines: [{ sku: A, quantity: -1, unit_price_cents: 500 }] }
+  - name: a rejected create has no order id
+    input:
+      - { source: http, seq: 2, kind: http.request, trace_id: t2, ids: {},
+          data: { method: POST, path: /orders, route: /orders, status: 422,
+                  request_headers: { idempotency-key: k2 },
+                  request_body: { customer_id: c1, currency: EUR, lines: [{ sku: A, quantity: 0, unit_price_cents: 500 }] },
+                  response_body: { error: validation_failed } } }
+    output:
+      - { status: 422, idempotency_key: k2, order_id: null }
+  - name: other routes are ignored
+    input:
+      - { source: http, seq: 3, kind: http.request, ids: { order_id: o1 },
+          data: { method: POST, path: /orders/o1/pay, route: "/orders/:id/pay", status: 200 } }
+    output: []
